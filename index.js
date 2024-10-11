@@ -5,7 +5,8 @@ const cors = require('cors');
 const { extractTextContent, getAnswerFromPdfContent } = require('./controllers/pdfController.module');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
+
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -15,13 +16,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             return res.status(400).json({ success: false, message: 'No file uploaded.' });
         }
 
-        const filePath = req.file.path;
-        const pdfContentResponse = await extractTextContent(filePath);
-        
-        if (!pdfContentResponse.success) {
-            return res.status(400).json(pdfContentResponse);
-        }
-
+        const pdfContentResponse = await extractTextContent(req.file.buffer);
         res.json(pdfContentResponse);
     } catch (error) {
         console.error("Error occurred:", error);
@@ -32,9 +27,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 app.post('/submit_pdf', async (req, res) => {
     try {
         const { pdfContent, userQuestion } = req.body;
-
         const apiResponse = await getAnswerFromPdfContent(pdfContent, userQuestion);
-        console.log("apiResponse", apiResponse);
         return res.status(200).json(apiResponse);
     } catch (error) {
         console.error("Error occurred:", error);
@@ -42,5 +35,5 @@ app.post('/submit_pdf', async (req, res) => {
     }
 });
 
-// No need for app.listen(); export app for Vercel
+// This line exports the Express app, which is important for Vercel.
 module.exports = app;
