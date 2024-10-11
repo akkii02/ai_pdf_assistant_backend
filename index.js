@@ -1,14 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const cors = require('cors');
+const cors = require('cors')
 const { extractTextContent, getAnswerFromPdfContent } = require('./controllers/pdfController.module');
 
 const app = express();
-const upload = multer({ storage: multer.memoryStorage() });
-
-app.use(cors());
+const upload = multer({ dest: 'uploads/' });
+app.use(cors())
 app.use(bodyParser.json());
+
 
 app.post('/upload', upload.single('file'), async (req, res) => {
     try {
@@ -16,7 +16,15 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             return res.status(400).json({ success: false, message: 'No file uploaded.' });
         }
 
-        const pdfContentResponse = await extractTextContent(req.file.buffer);
+        // console.log("File uploaded:", req.file); // Debugging log
+
+        const filePath = req.file.path;
+        const pdfContentResponse = await extractTextContent(filePath);
+        
+        if (!pdfContentResponse.success) {
+            return res.status(400).json(pdfContentResponse);
+        }
+
         res.json(pdfContentResponse);
     } catch (error) {
         console.error("Error occurred:", error);
@@ -27,7 +35,12 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 app.post('/submit_pdf', async (req, res) => {
     try {
         const { pdfContent, userQuestion } = req.body;
+
+        // console.log("Received pdfContent:", pdfContent); // Debugging log
+        // console.log("Received userQuestion:", userQuestion); // Debugging log
+
         const apiResponse = await getAnswerFromPdfContent(pdfContent, userQuestion);
+        console.log("apiResponse",apiResponse)
         return res.status(200).json(apiResponse);
     } catch (error) {
         console.error("Error occurred:", error);
@@ -35,5 +48,4 @@ app.post('/submit_pdf', async (req, res) => {
     }
 });
 
-// This line exports the Express app, which is important for Vercel.
 module.exports = app;
