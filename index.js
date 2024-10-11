@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
-const { extractTextContent, getAnswerFromPdfContent } = require('./controllers/pdfController');
+const { extractTextContent, getAnswerFromPdfContent } = require('./controllers/pdfController.module');
 
 require('dotenv').config();
 
@@ -25,7 +25,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // POST /upload
-app.post('/api/upload', upload.single('file'), async (req, res) => {
+app.post('/upload', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, message: 'No file uploaded.' });
@@ -49,7 +49,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 });
 
 // POST /submit_pdf
-app.post('/api/submit_pdf', async (req, res) => {
+app.post('/submit_pdf', async (req, res) => {
     try {
         const { pdfContent, userQuestion } = req.body;
 
@@ -66,4 +66,7 @@ app.post('/api/submit_pdf', async (req, res) => {
 });
 
 // Export the app for Vercel
-module.exports = app;
+// module.exports = app;
+app.listen(3001,()=>{
+    console.log("Port is running 3001")
+})
