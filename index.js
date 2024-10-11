@@ -1,29 +1,42 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const cors = require('cors')
-const { extractTextContent, getAnswerFromPdfContent } = require('./controllers/pdfController.module');
+const cors = require('cors');
+const fs = require('fs');
+const { extractTextContent, getAnswerFromPdfContent } = require('./controllers/pdfController');
+
+require('dotenv').config();
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
-app.use(cors())
+const upload = multer({
+    dest: 'uploads/',
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype !== 'application/pdf') {
+            return cb(new Error('Only PDFs are allowed!'), false);
+        }
+        cb(null, true);
+    },
+});
+
+app.use(cors());
 app.use(bodyParser.json());
 
-
-app.post('/upload', upload.single('file'), async (req, res) => {
+// POST /upload
+app.post('/api/upload', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, message: 'No file uploaded.' });
         }
 
-        // console.log("File uploaded:", req.file); // Debugging log
-
         const filePath = req.file.path;
         const pdfContentResponse = await extractTextContent(filePath);
-        
+
         if (!pdfContentResponse.success) {
             return res.status(400).json(pdfContentResponse);
         }
+
+        // Clean up the uploaded file
+        fs.unlinkSync(filePath);
 
         res.json(pdfContentResponse);
     } catch (error) {
@@ -32,15 +45,16 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 });
 
-app.post('/submit_pdf', async (req, res) => {
+// POST /submit_pdf
+app.post('/api/submit_pdf', async (req, res) => {
     try {
         const { pdfContent, userQuestion } = req.body;
 
-        // console.log("Received pdfContent:", pdfContent); // Debugging log
-        // console.log("Received userQuestion:", userQuestion); // Debugging log
+        if (!pdfContent || !userQuestion) {
+            return res.status(400).json({ success: false, message: 'Missing required fields: pdfContent or userQuestion.' });
+        }
 
         const apiResponse = await getAnswerFromPdfContent(pdfContent, userQuestion);
-        console.log("apiResponse",apiResponse)
         return res.status(200).json(apiResponse);
     } catch (error) {
         console.error("Error occurred:", error);
@@ -48,4 +62,5 @@ app.post('/submit_pdf', async (req, res) => {
     }
 });
 
+// Export the app for Vercel
 module.exports = app;

@@ -1,7 +1,6 @@
-const axios = require('axios'); 
+const axios = require('axios');
 const pdfParse = require('pdf-parse');
-const fs = require('fs'); 
-require('dotenv').config();
+const fs = require('fs');
 
 // Function to extract text from the PDF file
 exports.extractTextContent = async (file) => {
@@ -37,22 +36,18 @@ exports.getAnswerFromPdfContent = async (pdfContent, userQuestion) => {
                 input,
                 {
                     headers: {
-                        Authorization: 'Bearer process.env.API_KEY', // Replace with the actual token
+                        Authorization: `Bearer ${process.env.API_KEY}`, // Use the actual token from environment variable
                         'Content-Type': 'application/json'
                     }
                 }
             );
-            // console.log("RESPONSE", response.data);
             return response.data;
         } catch (error) {
             console.error('Error in Cloudflare API request:', error);
-            // Check if the error has a response property
             const message = error.response ? error.response.data.message : error.message;
             throw new Error(message);
         }
     }
-
-    console.log("PDFContent:", pdfContent);
 
     const input = {
         messages: [
@@ -67,7 +62,6 @@ exports.getAnswerFromPdfContent = async (pdfContent, userQuestion) => {
         ],
     };
     
-
     try {
         const response = await callCloudflareAPI(input);
         return {
@@ -84,4 +78,3 @@ exports.getAnswerFromPdfContent = async (pdfContent, userQuestion) => {
         };
     }
 };
-
