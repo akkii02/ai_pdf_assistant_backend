@@ -1,6 +1,7 @@
 const axios = require('axios'); 
 const pdfParse = require('pdf-parse');
 const fs = require('fs'); 
+require('dotenv').config();
 
 // Function to extract text from the PDF file
 exports.extractTextContent = async (file) => {
@@ -36,7 +37,7 @@ exports.getAnswerFromPdfContent = async (pdfContent, userQuestion) => {
                 input,
                 {
                     headers: {
-                        Authorization: 'Bearer yLB6tvSOpYSAbXvXZQuJlqrdVqP1mmldMFyf0bnG', // Replace with the actual token
+                        Authorization: 'Bearer process.env.API_KEY', // Replace with the actual token
                         'Content-Type': 'application/json'
                     }
                 }
