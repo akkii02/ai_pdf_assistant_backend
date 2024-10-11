@@ -8,6 +8,9 @@ const { extractTextContent, getAnswerFromPdfContent } = require('./controllers/p
 require('dotenv').config();
 
 const app = express();
+app.get("/",(req,res)=>{
+    res.status(200).send("hello")
+})
 const upload = multer({
     dest: 'uploads/',
     fileFilter: (req, file, cb) => {
