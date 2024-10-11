@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
-const { extractTextContent, getAnswerFromPdfContent } = require('./controllers/pdfController.module');
+const { extractTextContent, getAnswerFromPdfContent } = require('../controllers/pdfController.module');
 
 require('dotenv').config();
 
@@ -66,7 +66,7 @@ app.post('/submit_pdf', async (req, res) => {
 });
 
 // Export the app for Vercel
-// module.exports = app;
-app.listen(3001,()=>{
-    console.log("Port is running 3001")
-})
+module.exports = app;
+// app.listen(3001,()=>{
+//     console.log("Port is running 3001")
+// })
